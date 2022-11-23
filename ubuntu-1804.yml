@@ -9,7 +9,7 @@ pool:
       cxx: g++
     
 steps:
-- task: CmdLine@1
+- task: CmdLine@2
   inputs:
     script: |
        g++ --version
