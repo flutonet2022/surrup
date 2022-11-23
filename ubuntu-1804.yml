@@ -24,5 +24,3 @@ steps:
     pathToPublish: '$(build.artifactStagingDirectory)'
     artifactName: 'artifact'
     artifactType: 'container'
-
-pool: '4ones-agent-pool'
