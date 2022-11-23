@@ -2,10 +2,25 @@
 # Build your C++ projects with g++ and GNU Make.
 # https://aka.ms/yaml
 
-pool: '4ones-agent-pool'
-    
+pool:
+  name: Azure Pipelines
+  vmImage: ubuntu-20.04
+
+#variables:
+#  system.debug: 'true'
+
 steps:
-- task: CmdLine@1
+- script: 'make'
+
+- task: CopyFiles@2
+  displayName: 'Copy artifacts'
   inputs:
-    script: |
-       g++ --version
+    contents: '**/primes_in_range'
+    targetFolder: '$(build.artifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifacts'
+  inputs:
+    pathToPublish: '$(build.artifactStagingDirectory)'
+    artifactName: 'artifact'
+    artifactType: 'container'
