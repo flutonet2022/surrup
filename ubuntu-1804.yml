@@ -2,18 +2,11 @@
 # Build your C++ projects with g++ and GNU Make.
 # https://aka.ms/yaml
 
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-latest'
-    mac:
-      imageName: 'macOS-latest'
-    windows:
-      imageName: 'windows-latest'
+strategy
 
 pool:
   name: Azure Pipelines
-  vmImage: $(imageName)
+  vmImage: ubuntu-18.04
 
 #variables:
 #  system.debug: 'true'
