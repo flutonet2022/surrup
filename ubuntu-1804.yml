@@ -13,7 +13,7 @@ strategy:
 
 pool:
   name: Azure Pipelines
-  vmImage: ubuntu-20.04
+  vmImage: $(imageName)
 
 #variables:
 #  system.debug: 'true'
