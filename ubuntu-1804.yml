@@ -3,24 +3,13 @@
 # https://aka.ms/yaml
 
 pool:
-  name: Azure Pipelines
-  vmImage: ubuntu-20.04
-
-#variables:
-#  system.debug: 'true'
-
+    vmImage: 'Ubuntu-20.04'
+    variables:
+      cc: gcc
+      cxx: g++
+    
 steps:
-- script: 'make'
-
-- task: CopyFiles@2
-  displayName: 'Copy artifacts'
+- task: CmdLine@1
   inputs:
-    contents: '**/primes_in_range'
-    targetFolder: '$(build.artifactStagingDirectory)'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish artifacts'
-  inputs:
-    pathToPublish: '$(build.artifactStagingDirectory)'
-    artifactName: 'artifact'
-    artifactType: 'container'
+    script: |
+       g++ --version
