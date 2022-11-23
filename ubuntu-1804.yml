@@ -2,11 +2,9 @@
 # Build your C++ projects with g++ and GNU Make.
 # https://aka.ms/yaml
 
-strategy
-
 pool:
   name: Azure Pipelines
-  vmImage: ubuntu-18.04
+  vmImage: ubuntu-20.04
 
 #variables:
 #  system.debug: 'true'
