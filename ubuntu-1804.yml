@@ -2,11 +2,7 @@
 # Build your C++ projects with g++ and GNU Make.
 # https://aka.ms/yaml
 
-pool:
-    vmImage: 'Ubuntu-20.04'
-    variables:
-      cc: gcc
-      cxx: g++
+pool: '4ones-agent-pool'
     
 steps:
 - task: CmdLine@1
