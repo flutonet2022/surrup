@@ -11,7 +11,6 @@ pool:
 
 steps:
 - script: 
-    sudo killall apt apt-get
     sudo apt-get update
     sudo apt-get -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install libcurl4-openssl-dev
     sudo apt-get install -y libjsoncpp-dev
