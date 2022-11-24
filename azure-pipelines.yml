@@ -10,9 +10,9 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: 
+- script: |
+    sudo apt-get update
     sudo apt-get -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install libcurl4-openssl-dev
-
   displayName: 'Run a one-line script'
 
 - script: |
