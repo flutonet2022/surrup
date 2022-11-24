@@ -20,7 +20,7 @@ steps:
     script: |
       echo converting file encoding
       echo $(pwd)
-      find ./ -type f -iname *.hpp -exec sh -c 'echo "{}"; iconv -f $(file -bi "$1" | sed -e "s/.*[ ]charset=//") -t utf-8 -o converted "$1" && mv converted "$1"' -- {} \;
+      find ./ -type f -iname '*.hpp' -exec sh -c 'echo "{}"; iconv -f $(file -bi "$1" | sed -e "s/.*[ ]charset=//") -t utf-8 -o converted "$1" && mv converted "$1"' -- {} \;
       echo converting file encoding is end
     workingDirectory: './'
 
