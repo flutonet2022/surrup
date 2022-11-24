@@ -10,11 +10,11 @@ pool:
 #  system.debug: 'true'
 
 -steps:
-  script:
-  -'sudo apt-get update'
-  -'sudo apt -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || apt-get install libcur4-openssl-dev'
-  -'sudo apt-get install -y libjsoncpp-dev'
-  -'sudo make -C ./server'.
+  - script: |
+    sudo apt-get update
+    sudo apt -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || apt-get install libcur4-openssl-dev
+    sudo apt-get install -y libjsoncpp-dev
+    sudo make -C ./server
 
 - task: CopyFiles@2
   displayName: 'Copy artifacts'
