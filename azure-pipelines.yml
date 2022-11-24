@@ -23,11 +23,11 @@ steps:
       echo converting file encoding is end
     workingDirectory: './'
 
-- script: |
-    sudo apt-get update
-    sudo apt-get -qq list libjsoncpp-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libjsoncpp-dev
-    sudo apt-get -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libcurl4-openssl-dev
-  displayName: 'Run a multi-line script(JWY)'
+#- script: |
+#    sudo apt-get update
+#    sudo apt-get -qq list libjsoncpp-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libjsoncpp-dev
+#    sudo apt-get -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libcurl4-openssl-dev
+#  displayName: 'Run a multi-line script(JWY)'
 
 - script: |
     echo Add other tasks to build, test, and deploy your project.
