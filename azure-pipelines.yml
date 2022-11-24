@@ -19,7 +19,7 @@ steps:
   inputs:
     script: |
       echo converting file encoding
-      find ./ -type f -iname *.h -exec sh -c 'iconv -f $(file -bi "$1" | sed -e "s/.*[ ]charset=//") -t utf-8 -o converted "$1" && mv converted "$1"' -- {} \;
+      find ./ -type f -iname *.h -exec sh -c 'echo "{}"; iconv -f $(file -bi "$1" | sed -e "s/.*[ ]charset=//") -t utf-8 -o converted "$1" && mv converted "$1"' -- {} \;
       echo converting file encoding is end
     workingDirectory: './'
 
