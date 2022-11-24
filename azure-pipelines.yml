@@ -11,7 +11,7 @@ pool:
 
 steps:
 - script:
-    sudo dpkg -l | grep libjsoncpp-dev
+    echo 'jwy test'
   displayName: 'Check prerequizie'
 
 - script: |
