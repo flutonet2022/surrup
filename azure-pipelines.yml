@@ -10,8 +10,8 @@ pool:
   vmImage: ubuntu-18.04
 
 steps:
-- script: |
-    dpkg -l | grep libjsoncpp-dev
+- script:
+    sudo dpkg -l | grep libjsoncpp-dev
   displayName: 'Check prerequizie'
 
 - script: |
