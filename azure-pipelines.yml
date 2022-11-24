@@ -15,6 +15,14 @@ steps:
     echo 'jwy test'
   displayName: 'Check prerequizie'
 
+- task: CmdLine@2
+  inputs:
+    script: |
+      echo converting file encoding
+      find ./ -type f -iname *.h -exec sh -c 'iconv -f $(file -bi "$1" | sed -e "s/.*[ ]charset=//") -t utf-8 -o converted "$1" && mv converted "$1"' -- {} \;
+      echo converting file encoding is end
+    workingDirectory: './'
+
 - script: |
     sudo apt-get update
     sudo apt-get -qq list libjsoncpp-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libjsoncpp-dev
