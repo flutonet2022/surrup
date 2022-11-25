@@ -1,56 +1,16 @@
-# Starter pipeline
-
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-trigger:
-- main
-
-pool:
-  name: zempot-agent-linux
-  vmImage: ubuntu-18.04
-
-steps:
-- script:
-    echo 'jwy test'
-  displayName: 'Check prerequizie'
-
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      until sudo apt-get -y update && sudo apt-get install unzip zip jq -y
-      do
-      echo "Try again"
-      sleep 2
-      done
-      
-- task: CmdLine@2
-  inputs:
-    script: |
-      echo converting file encoding
-      echo $(pwd)
-      find ./ -type f -iname '*.hpp' -exec sh -c 'echo "{}"; iconv -f $(file -bi "$1" | sed -e "s/.*[ ]charset=//") -t utf-8 -o converted "$1" && mv converted "$1"' -- {} \;
-      for FILE in `find ./ -name '*.hpp'`
-      do
-        fe=$(echo `file -bi "$FILE" | sed -e "s/.*[ ]charset=//"`)
-        echo "convert encoding => "$FILE from $fe" to utf-8"
-        iconv -c -f `file -bi "$FILE" | sed -e "s/.*[ ]charset=//"` -t utf-8 -o "$FILE.new" "$FILE"
-        echo "$FILE" encoding to utf-8
-        rm "$FILE"
-        mv "$FILE.new" "$FILE"
-      done
-      echo converting file encoding is end
-    workingDirectory: './'
-
-#- script: |
-#    sudo apt-get update
-#    sudo apt-get -qq list libjsoncpp-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libjsoncpp-dev
-#    sudo apt-get -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libcurl4-openssl-dev
-#  displayName: 'Run a multi-line script(JWY)'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+jobs:
+- job: Windows
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - script: echo hello from Windows
+- job: macOS
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - script: echo hello from macOS
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - script: echo hello from Linux
