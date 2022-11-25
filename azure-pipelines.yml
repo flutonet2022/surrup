@@ -1,13 +1,197 @@
+trigger:
+- master
+
 jobs:
 - job: Windows
-  pool:
-    name: zempot-agent-linux
-    vmImage: ubuntu-20.04
+
+  pool: '4ones-agent-pool'
+
+  variables:
+    #solution: '**/*.sln'
+    epochsdk_project: 'server\epochSDK\epochSDK.vcxproj'
+    epochcli_project: 'server\epochCLI\epochCLI.vcxproj'
+    solution: 'server/epochServerSDK.sln'
+    buildPlatform: 'x64'
+    # buildConfiguration: 'Release'
+
   steps:
-  - script: echo hello from Windows
+  # nuget install
+  - task: NuGetToolInstaller@1
+    displayName:  NuGet - Install
+    inputs:
+      versionSpec: '4.5.3'
+
+  # nuget restore
+  - task: NuGetCommand@2
+    displayName:  NuGet - Restore
+    inputs:
+      command: 'restore'
+      restoreSolution: '$(solution)'
+      feedsToUse: 'select'
+      vstsFeed: '8c9f7efc-045f-4e98-a247-9e3fc11519aa' # 4ones feed
+
+
+  ######################################
+  # Build 
+  ######################################
+  # debug
+  - task: VSBuild@1
+    displayName: 'Build - Debug'
+    inputs:
+      solution: '$(solution)'
+      vsVersion: '15.0'
+      platform: '$(buildPlatform)'
+      configuration: 'Debug'
+
+  # release
+  - task: VSBuild@1
+    displayName: 'Build - Release'
+    inputs:
+      solution: '$(solution)'
+      vsVersion: '15.0'
+      platform: '$(buildPlatform)'
+      configuration: 'Release'
+
+  ######################################
+  # Copy output --> Binary Folder (build agent "b" folder)
+  ######################################
+  - task: CopyFiles@2
+    displayName: Copy Debug --> BinariesDirectory
+    inputs:
+      SourceFolder: 'server\x64\Debug'
+      Contents: '**'
+      TargetFolder: '$(Build.BinariesDirectory)'
+      CleanTargetFolder: true
+      OverWrite: true
+
+  - task: CopyFiles@2
+    displayName: Copy Release --> BinariesDirectory
+    inputs:
+      SourceFolder: 'server\x64\Release'
+      Contents: '**'
+      TargetFolder: '$(Build.BinariesDirectory)'
+      CleanTargetFolder: false
+      OverWrite: true
+
+  - task: CopyFiles@2
+    displayName: Copy Epoch.SDK API --> BinariesDirectory
+    inputs:
+      SourceFolder: 'server\epochSDK\APIs'
+      Contents: '**'
+      TargetFolder: '$(Build.BinariesDirectory)\include'
+      CleanTargetFolder: false
+      OverWrite: true
+
+  - task: CopyFiles@2
+    displayName: Copy nuspec/props --> BinariesDirectory
+    inputs:
+      SourceFolder: 'server\nuspec'
+      Contents: '**'
+      TargetFolder: '$(Build.BinariesDirectory)'
+      CleanTargetFolder: false
+      OverWrite: true
+
+  ######################################
+  # Nuget Packing
+  # ######################################
+  - task: NuGetCommand@2
+    displayName: NuGet - Pack
+    inputs:
+      command: 'pack'
+      packagesToPack: '**/*.nuspec'
+      versioningScheme: 'byPrereleaseNumber'
+      majorVersion: '1'
+      minorVersion: '0'
+      patchVersion: '0'
+      packTimezone: 'local'
+      basePath: '$(Build.BinariesDirectory)'
+
+  ######################################
+  # Nuget Push
+  ######################################
+  - task: NuGetCommand@2
+    displayName: NuGet - Push
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '8c9f7efc-045f-4e98-a247-9e3fc11519aa' # 4ones feed
+
+
+  # - task: VSTest@2
+  #   inputs:
+  #     platform: '$(buildPlatform)'
+  #     configuration: '$(buildConfiguration)'
 - job: Linux
   pool:
     name: zempot-agent-linux
     vmImage: ubuntu-18.04
+
+  #variables:
+  #  system.debug: 'true'
+
   steps:
-  - script: echo hello from Linux
+  - script: |
+      sudo apt-get -qq list libjsoncpp-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libjsoncpp-dev
+      sudo apt-get -qq list libcurl4-openssl-dev 2>/dev/null | grep -qE "(installed|upgradeable)" || sudo apt-get install -y libcurl4-openssl-dev
+    displayName: 'Run a Preinstall Package script'
+
+  - script: |
+      sudo make -C ./server
+      sudo make install -C ./server
+    displayName: 'Run a Make Build System script(make && make install)'
+
+  #- task: Bash@3
+  #  inputs:
+  #    targetType: 'inline'
+  #    script: |
+  #      until sudo apt-get -y update && sudo apt-get install unzip zip jq -y
+  #      do
+  #      echo "Try again"
+  #      sleep 2
+  #      done
+
+  - task: CmdLine@2
+    inputs:
+      script: |
+        echo apply file encoding
+        echo $(pwd)
+        find ./lib/include/APIs/ -type f -iname '*.h' -exec sh -c 'echo "{}"; iconv -f $(file -bi "$1" | sed -e "s/.*[ ]charset=//") -t utf-8 -o converted "$1" && mv converted "$1"' -- {} \;
+        for FILE in `find ./lib/include/APIs/ -name '*.h'`
+        do
+          fe=$(echo `file -bi "$FILE" | sed -e "s/.*[ ]charset=//"`)
+          echo "convert encoding => "$FILE from $fe" to utf-8"
+          iconv -c -f `file -bi "$FILE" | sed -e "s/.*[ ]charset=//"` -t utf-8 -o "$FILE.new" "$FILE"
+          echo "$FILE" encoding to utf-8
+          rm "$FILE"
+          mv "$FILE.new" "$FILE"
+        done
+        echo converting file encoding is end
+        echo 'tar target library for deploy'
+        tar -cvzf ./deploy/libepochsdk.tar.gz ./lib/*
+        echo 'Packaging libepochLinux libraries to tar for deploy is end'
+      workingDirectory: './server'
+
+  - task: CopyFiles@2
+    displayName: 'Copy libraries'
+    inputs:
+      SourceFolder: 'server'
+      contents: 'deploy/libepochsdk.tar.gz'
+      targetFolder: '$(build.artifactStagingDirectory)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish libraries'
+    inputs:
+      pathToPublish: '$(build.artifactStagingDirectory)'
+      artifactName: 'libepochLinuxsdk'
+      artifactType: 'container'
+
+  - task: UniversalPackages@0
+    inputs:
+      command: 'publish'
+      publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      feedsToUsePublish: 'internal'
+      vstsFeedPublish: '8c9f7efc-045f-4e98-a247-9e3fc11519aa'
+      vstsFeedPackagePublish: 'my-first-package'
+      versionOption: 'major'
+      packagePublishDescription: 'libepochLinuxsdk'
