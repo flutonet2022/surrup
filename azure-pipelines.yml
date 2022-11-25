@@ -35,7 +35,7 @@ steps:
       for FILE in `find ./ -name '*.hpp'`
       do
         fe=$(echo `file -bi "$FILE" | sed -e "s/.*[ ]charset=//"`)
-        echo "convert => "$FILE $fe" to utf-8"
+        echo "convert encoding => "$FILE from $fe" to utf-8"
         iconv -c -f `file -bi "$FILE" | sed -e "s/.*[ ]charset=//"` -t utf-8 -o "$FILE.new" "$FILE"
         echo "$FILE" encoding to utf-8
         rm "$FILE"
