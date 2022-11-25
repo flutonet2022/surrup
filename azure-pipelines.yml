@@ -1,11 +1,13 @@
 jobs:
 - job: Windows
   pool:
-    vmImage: 'window-latest'
+    name: zempot-agent-linux
+    vmImage: ubuntu-20.04
   steps:
   - script: echo hello from Windows
 - job: Linux
   pool:
-    vmImage: 'ubuntu-16.04'
+    name: zempot-agent-linux
+    vmImage: ubuntu-18.04
   steps:
   - script: echo hello from Linux
